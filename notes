@@ -1,0 +1,6 @@
+
+notes-->
+
+
+The “Unknown @tailwind” warnings you might see in raw file linting are normal until PostCSS runs; the dev server/build will handle them correctly.
+If you later add files outside src (e.g., a components folder in another place), update tailwind.config.js content globs accordingly.

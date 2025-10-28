@@ -1,0 +1,32 @@
+### Test Auth Endpoints
+
+### 1. Signup - Register a new user
+POST http://localhost:5000/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Anuj Yadav",
+  "email": "anuj@example.com",
+  "password": "mypassword"
+}
+
+###
+
+### 2. Login - Authenticate user
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "anuj@example.com",
+  "password": "mypassword"
+}
+
+###
+
+### 3. Test Route
+GET http://localhost:5000/api/test
+
+###
+
+### 4. Root Route
+GET http://localhost:5000/
