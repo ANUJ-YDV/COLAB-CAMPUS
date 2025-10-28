@@ -12,14 +12,17 @@ Content-Type: application/json
 
 ###
 
-### 2. Login - Authenticate user
+### 2. Login - Authenticate user (SAVE THE TOKEN!)
 POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "anuj@example.com",
-  "password": "mypassword"
+  "email": "test@collabcampus.com",
+  "password": "hashedPlaceholder"
 }
+
+# Copy the token from response and use it in Authorization header below
+# Format: Bearer <your-token-here>
 
 ###
 
@@ -30,3 +33,159 @@ GET http://localhost:5000/api/test
 
 ### 4. Root Route
 GET http://localhost:5000/
+
+###
+
+### ========================================
+### PROJECT ENDPOINTS (RESTful + Protected)
+### ========================================
+# Replace YOUR_TOKEN_HERE with actual token from login response
+
+### 5. Create Project (POST /api/projects/)
+POST http://localhost:5000/api/projects
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "name": "My Authenticated Project",
+  "description": "This is a test project created with auth",
+  "members": []
+}
+
+###
+
+### 6. Get All My Projects (GET /api/projects/)
+GET http://localhost:5000/api/projects
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 7. Get Single Project by ID (GET /api/projects/:id)
+GET http://localhost:5000/api/projects/6900ebd4a6305efc84cffebc
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 8. Update Project (PUT /api/projects/:id) - Owner only
+PUT http://localhost:5000/api/projects/6900ebd4a6305efc84cffebc
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "name": "Updated Project Name",
+  "description": "Updated description"
+}
+
+###
+
+### 9. Delete Project (DELETE /api/projects/:id) - Owner only
+DELETE http://localhost:5000/api/projects/PROJECT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 10. Add Member to Project (POST /api/projects/:id/members)
+POST http://localhost:5000/api/projects/6900ebd4a6305efc84cffebc/members
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "userId": "68fce78e04a6094eeb3aa8ea"
+}
+
+###
+
+### 11. Remove Member from Project (DELETE /api/projects/:id/members/:userId)
+DELETE http://localhost:5000/api/projects/6900ebd4a6305efc84cffebc/members/68fce78e04a6094eeb3aa8ea
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### Legacy Route - Get User Projects (Public)
+GET http://localhost:5000/api/projects/user/6900ebd4a6305efc84cffeba
+
+###
+
+### ========================================
+### TASK ENDPOINTS (Protected Routes)
+### ========================================
+
+### 11. Create Task (Protected - requires token)
+POST http://localhost:5000/api/tasks/create
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "title": "Setup database schema",
+  "description": "Create User, Project, and Task models",
+  "projectId": "6900ebd4a6305efc84cffebc",
+  "assignedTo": "6900ebd4a6305efc84cffeba",
+  "priority": "high",
+  "status": "todo",
+  "dueDate": "2025-11-01"
+}
+
+###
+
+### 12. Get Project Tasks (Protected - requires membership)
+GET http://localhost:5000/api/tasks/project/6900ebd4a6305efc84cffebc
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 13. Get My Tasks (Protected - requires token)
+GET http://localhost:5000/api/tasks/my-tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 14. Get User Tasks (Public - backward compatibility)
+GET http://localhost:5000/api/tasks/user/6900ebd4a6305efc84cffeba
+
+###
+
+### 15. Update Task Status (Protected - requires token)
+PATCH http://localhost:5000/api/tasks/6900ebd4a6305efc84cffebf/status
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "status": "in-progress"
+}
+
+###
+
+### 16. Assign Task (Protected - requires token)
+PATCH http://localhost:5000/api/tasks/6900ebd4a6305efc84cffec1/assign
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "userId": "6900ebd4a6305efc84cffeba"
+}
+
+###
+
+### 17. Add Comment to Task (Protected - uses authenticated user as author)
+POST http://localhost:5000/api/tasks/6900ebd4a6305efc84cffebf/comments
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "message": "This looks good! Let's proceed with this approach."
+}
+
+###
+
+### 18. Delete Task (Protected - requires token)
+DELETE http://localhost:5000/api/tasks/TASK_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+###
+
+### 16. Delete Task
+DELETE http://localhost:5000/api/tasks/TASK_ID_HERE
+
+###
