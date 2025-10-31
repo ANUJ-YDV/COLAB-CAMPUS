@@ -15,20 +15,18 @@ export default function ProjectBoardWithSocket() {
     // Join the project room when component mounts
     if (socket) {
       const projectId = '1'; // Get from useParams() in real app
-      
+
       console.log(`📡 Joining project room: ${projectId}`);
       socket.emit('join_project', { projectId });
 
       // Listen for task updates from other users
       socket.on('task_updated', (data) => {
         console.log('📩 Task updated by another user:', data);
-        
+
         // Update local state with the change
-        setTasks(prevTasks =>
-          prevTasks.map(task =>
-            task._id === data.taskId
-              ? { ...task, status: data.newStatus }
-              : task
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === data.taskId ? { ...task, status: data.newStatus } : task
           )
         );
       });
@@ -48,7 +46,7 @@ export default function ProjectBoardWithSocket() {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get('http://localhost:5000/api/tasks/project/1', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setTasks(response.data);
       } catch (err) {
@@ -65,19 +63,17 @@ export default function ProjectBoardWithSocket() {
     const newStatus = destination.droppableId;
 
     // Find the task
-    const task = tasks.find(t => t._id === draggableId);
+    const task = tasks.find((t) => t._id === draggableId);
     if (!task || task.status === newStatus) return;
 
     // Optimistic update
-    setTasks(prevTasks =>
-      prevTasks.map(t =>
-        t._id === draggableId ? { ...t, status: newStatus } : t
-      )
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t._id === draggableId ? { ...t, status: newStatus } : t))
     );
 
     try {
       const token = localStorage.getItem('token');
-      
+
       // Update via REST API
       await axios.put(
         `http://localhost:5000/api/tasks/${draggableId}`,
@@ -98,20 +94,18 @@ export default function ProjectBoardWithSocket() {
       console.log('✅ Task updated successfully');
     } catch (err) {
       console.error('❌ Error updating task:', err);
-      
+
       // Revert optimistic update on error
-      setTasks(prevTasks =>
-        prevTasks.map(t =>
-          t._id === draggableId ? { ...t, status: task.status } : t
-        )
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t._id === draggableId ? { ...t, status: task.status } : t))
       );
     }
   };
 
   const columns = {
-    todo: tasks.filter(t => t.status === 'todo'),
-    'in-progress': tasks.filter(t => t.status === 'in-progress'),
-    done: tasks.filter(t => t.status === 'done'),
+    todo: tasks.filter((t) => t.status === 'todo'),
+    'in-progress': tasks.filter((t) => t.status === 'in-progress'),
+    done: tasks.filter((t) => t.status === 'done'),
   };
 
   return (
@@ -144,9 +138,7 @@ export default function ProjectBoardWithSocket() {
                 >
                   <h2 className="text-xl font-semibold mb-4 capitalize">
                     {columnId.replace('-', ' ')}
-                    <span className="text-sm text-gray-500 ml-2">
-                      ({columns[columnId].length})
-                    </span>
+                    <span className="text-sm text-gray-500 ml-2">({columns[columnId].length})</span>
                   </h2>
 
                   {columns[columnId].map((task, index) => (

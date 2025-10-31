@@ -1,12 +1,12 @@
 // server/controllers/taskController.js
-import Task from "../models/task.js";
-import Project from "../models/project.js";
+import Task from '../models/task.js';
+import Project from '../models/project.js';
 
 // Socket.io instance for real-time broadcasting
 let io;
-export const setIO = (ioInstance) => { 
+export const setIO = (ioInstance) => {
   io = ioInstance;
-  console.log("✅ Socket.io instance attached to taskController");
+  console.log('✅ Socket.io instance attached to taskController');
 };
 
 /**
@@ -14,33 +14,30 @@ export const setIO = (ioInstance) => {
  * @param {Object} params - { title, description, projectId, assignedTo, dueDate, priority }
  * @returns {Promise<Task>} - The created task
  */
-export async function createTask({ 
-  title, 
-  description = "", 
-  projectId, 
-  assignedTo = null, 
+export async function createTask({
+  title,
+  description = '',
+  projectId,
+  assignedTo = null,
   dueDate = null,
-  priority = "medium",
-  status = "todo"
+  priority = 'medium',
+  status = 'todo',
 }) {
   // Create the task
-  const task = new Task({ 
-    title, 
+  const task = new Task({
+    title,
     description,
-    project: projectId, 
-    assignedTo, 
+    project: projectId,
+    assignedTo,
     dueDate,
     priority,
-    status
+    status,
   });
-  
+
   await task.save();
 
   // Add task to project's tasks array
-  await Project.findByIdAndUpdate(
-    projectId, 
-    { $push: { tasks: task._id } }
-  );
+  await Project.findByIdAndUpdate(projectId, { $push: { tasks: task._id } });
 
   return task;
 }
@@ -53,20 +50,19 @@ export async function createTask({
  * @returns {Promise<Task>} - Updated task
  */
 export async function updateTaskStatus(taskId, status, projectId = null) {
-  const task = await Task.findByIdAndUpdate(
-    taskId,
-    { status },
-    { new: true }
-  ).populate('assignedTo', 'name email');
+  const task = await Task.findByIdAndUpdate(taskId, { status }, { new: true }).populate(
+    'assignedTo',
+    'name email'
+  );
 
   // --- Real-time broadcast to project room ---
   if (io && projectId) {
     console.log(`📡 Broadcasting task_moved to project ${projectId}`);
-    io.to(projectId).emit("task_moved", { 
+    io.to(projectId).emit('task_moved', {
       taskId: task._id.toString(),
       status: task.status,
       title: task.title,
-      assignedTo: task.assignedTo
+      assignedTo: task.assignedTo,
     });
   }
 
@@ -80,11 +76,7 @@ export async function updateTaskStatus(taskId, status, projectId = null) {
  * @returns {Promise<Task>} - Updated task
  */
 export async function assignTask(taskId, userId) {
-  const task = await Task.findByIdAndUpdate(
-    taskId,
-    { assignedTo: userId },
-    { new: true }
-  );
+  const task = await Task.findByIdAndUpdate(taskId, { assignedTo: userId }, { new: true });
 
   return task;
 }
@@ -99,14 +91,14 @@ export async function assignTask(taskId, userId) {
 export async function addCommentToTask(taskId, authorId, message) {
   const task = await Task.findByIdAndUpdate(
     taskId,
-    { 
-      $push: { 
-        comments: { 
-          author: authorId, 
-          message, 
-          createdAt: new Date() 
-        } 
-      } 
+    {
+      $push: {
+        comments: {
+          author: authorId,
+          message,
+          createdAt: new Date(),
+        },
+      },
     },
     { new: true }
   ).populate('comments.author', 'name email');
@@ -121,21 +113,18 @@ export async function addCommentToTask(taskId, authorId, message) {
  */
 export async function deleteTask(taskId) {
   const task = await Task.findById(taskId);
-  
+
   if (!task) {
-    throw new Error("Task not found");
+    throw new Error('Task not found');
   }
 
   // Remove task from project's tasks array
-  await Project.findByIdAndUpdate(
-    task.project,
-    { $pull: { tasks: taskId } }
-  );
+  await Project.findByIdAndUpdate(task.project, { $pull: { tasks: taskId } });
 
   // Delete the task
   await Task.findByIdAndDelete(taskId);
 
-  return { message: "Task deleted successfully" };
+  return { message: 'Task deleted successfully' };
 }
 
 /**
@@ -148,7 +137,7 @@ export async function getProjectTasks(projectId) {
     .populate('assignedTo', 'name email')
     .populate('comments.author', 'name email')
     .sort({ createdAt: -1 });
-  
+
   return tasks;
 }
 
@@ -161,6 +150,6 @@ export async function getUserTasks(userId) {
   const tasks = await Task.find({ assignedTo: userId })
     .populate('project', 'name')
     .sort({ dueDate: 1 });
-  
+
   return tasks;
 }

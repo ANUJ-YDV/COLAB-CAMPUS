@@ -1,8 +1,8 @@
 // server/controllers/messageController.js
-import Message from "../models/message.js";
+import Message from '../models/message.js';
 
 /**
- * Create a new message
+ * Create a new message for a project
  * @param {String} projectId - The project ID
  * @param {String} senderId - The sender's user ID
  * @param {String} content - Message content
@@ -12,14 +12,36 @@ export async function createMessage(projectId, senderId, content) {
   const message = new Message({
     project: projectId,
     sender: senderId,
-    content: content.trim()
+    content: content.trim(),
   });
 
   await message.save();
-  
+
   // Populate sender details for returning to client
-  await message.populate('sender', 'name email');
-  
+  await message.populate('sender', 'name email username');
+
+  return message;
+}
+
+/**
+ * Create a new message for a conversation
+ * @param {String} conversationId - The conversation ID
+ * @param {String} senderId - The sender's user ID
+ * @param {String} content - Message content
+ * @returns {Promise<Message>} - The created message with sender populated
+ */
+export async function createConversationMessage(conversationId, senderId, content) {
+  const message = new Message({
+    conversation: conversationId,
+    sender: senderId,
+    content: content.trim(),
+  });
+
+  await message.save();
+
+  // Populate sender details for returning to client
+  await message.populate('sender', 'name email username');
+
   return message;
 }
 
@@ -31,10 +53,26 @@ export async function createMessage(projectId, senderId, content) {
  */
 export async function getProjectMessages(projectId, limit = 50) {
   const messages = await Message.find({ project: projectId })
-    .populate('sender', 'name email')
+    .populate('sender', 'name email username')
     .sort({ createdAt: -1 }) // Most recent first
     .limit(limit);
-  
+
+  // Reverse to show oldest first (chronological order)
+  return messages.reverse();
+}
+
+/**
+ * Get chat history for a conversation
+ * @param {String} conversationId - The conversation ID
+ * @param {Number} limit - Number of messages to retrieve (default: 50)
+ * @returns {Promise<Array>} - Array of messages with sender details
+ */
+export async function getConversationMessages(conversationId, limit = 50) {
+  const messages = await Message.find({ conversation: conversationId })
+    .populate('sender', 'name email username')
+    .sort({ createdAt: -1 }) // Most recent first
+    .limit(limit);
+
   // Reverse to show oldest first (chronological order)
   return messages.reverse();
 }
@@ -47,17 +85,17 @@ export async function getProjectMessages(projectId, limit = 50) {
  */
 export async function deleteMessage(messageId, userId) {
   const message = await Message.findById(messageId);
-  
+
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error('Message not found');
   }
 
   // Only allow sender to delete their own message
   if (message.sender.toString() !== userId.toString()) {
-    throw new Error("Not authorized to delete this message");
+    throw new Error('Not authorized to delete this message');
   }
 
   await Message.findByIdAndDelete(messageId);
-  
-  return { message: "Message deleted successfully" };
+
+  return { message: 'Message deleted successfully' };
 }

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged for server
+cd server && npx lint-staged && cd ..
+
+# Run lint-staged for client
+cd client && npx lint-staged

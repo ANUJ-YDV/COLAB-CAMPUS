@@ -53,12 +53,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6">Login</h2>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
+
+        {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -77,7 +73,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
@@ -88,10 +84,7 @@ export default function Login() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <button 
-            onClick={() => navigate('/signup')}
-            className="text-blue-500 hover:underline"
-          >
+          <button onClick={() => navigate('/signup')} className="text-blue-500 hover:underline">
             Sign up
           </button>
         </p>

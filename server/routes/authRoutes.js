@@ -2,6 +2,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+import { protect } from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 
@@ -30,6 +31,17 @@ router.post("/login", async (req, res) => {
     res.status(200).json({ message: "Login successful", token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// Get all users (for DM user list)
+router.get("/users", protect, async (req, res) => {
+  try {
+    const users = await User.find({}, { password: 0 }).select('_id name email');
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Get users error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });

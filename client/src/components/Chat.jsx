@@ -1,19 +1,19 @@
 // client/src/components/Chat.jsx
-import { useState, useEffect, useRef } from "react";
-import { useSocket } from "../SocketContext";
-import axios from "axios";
+import { useState, useEffect, useRef } from 'react';
+import { useSocket } from '../SocketContext';
+import axios from 'axios';
 
 export default function Chat({ projectId }) {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  const currentUserId = localStorage.getItem("userId"); // Assuming userId is stored
+  const currentUserId = localStorage.getItem('userId'); // Assuming userId is stored
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -40,16 +40,16 @@ export default function Chat({ projectId }) {
 
     // Receive new messages in real-time
     const handleReceiveMessage = (message) => {
-      console.log("💬 New message received:", message);
+      console.log('💬 New message received:', message);
       setMessages((prev) => [...prev, message]);
     };
 
-    socket.on("chat_history", handleChatHistory);
-    socket.on("receive_message", handleReceiveMessage);
+    socket.on('chat_history', handleChatHistory);
+    socket.on('receive_message', handleReceiveMessage);
 
     return () => {
-      socket.off("chat_history", handleChatHistory);
-      socket.off("receive_message", handleReceiveMessage);
+      socket.off('chat_history', handleChatHistory);
+      socket.off('receive_message', handleReceiveMessage);
     };
   }, [socket]);
 
@@ -60,13 +60,13 @@ export default function Chat({ projectId }) {
     if (!newMessage.trim() || !socket) return;
 
     // Emit message to server
-    socket.emit("send_message", {
+    socket.emit('send_message', {
       projectId,
-      content: newMessage.trim()
+      content: newMessage.trim(),
     });
 
     // Clear input
-    setNewMessage("");
+    setNewMessage('');
   };
 
   // Format timestamp
@@ -76,10 +76,10 @@ export default function Chat({ projectId }) {
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins < 1) return "Just now";
+    if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -109,30 +109,20 @@ export default function Chat({ projectId }) {
         ) : (
           messages.map((msg) => {
             const isOwnMessage = msg.sender._id === currentUserId;
-            
+
             return (
               <div
                 key={msg._id}
-                className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
+                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[70%] rounded-lg p-3 ${
-                    isOwnMessage
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-800"
+                    isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  {!isOwnMessage && (
-                    <p className="text-xs font-semibold mb-1">
-                      {msg.sender.name}
-                    </p>
-                  )}
+                  {!isOwnMessage && <p className="text-xs font-semibold mb-1">{msg.sender.name}</p>}
                   <p className="break-words">{msg.content}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      isOwnMessage ? "text-blue-100" : "text-gray-500"
-                    }`}
-                  >
+                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}`}>
                     {formatTime(msg.createdAt)}
                   </p>
                 </div>
@@ -163,11 +153,7 @@ export default function Chat({ projectId }) {
             Send
           </button>
         </div>
-        {!socket && (
-          <p className="text-xs text-red-500 mt-2">
-            Not connected to chat server
-          </p>
-        )}
+        {!socket && <p className="text-xs text-red-500 mt-2">Not connected to chat server</p>}
       </form>
     </div>
   );
